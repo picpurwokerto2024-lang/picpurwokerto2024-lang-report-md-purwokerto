@@ -20,6 +20,8 @@ import {
   Layers,
   Sparkles,
   ShieldAlert,
+  Camera,
+  User,
 } from 'lucide-react';
 import BtbLogo from './BtbLogo';
 
@@ -71,16 +73,22 @@ export default function AdminModal({
   // Hidden file inputs
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const logoFileInputRef = useRef<HTMLInputElement | null>(null);
+  const menuPhotoInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadTargetIdx, setUploadTargetIdx] = useState<number | null>(null);
+  const [uploadMenuIdx, setUploadMenuIdx] = useState<number | null>(null);
 
-  // Sync with prop updates
+  // Sync with prop updates ONLY when modal opens to prevent overwriting active edits
+  const prevIsOpenRef = useRef(false);
   React.useEffect(() => {
-    setMenus(initialMenus);
-    setSettings(initialSettings);
-    if (initialSettings.banners && initialSettings.banners.length > 0) {
-      setBanners(initialSettings.banners);
+    if (isOpen && !prevIsOpenRef.current) {
+      setMenus(initialMenus);
+      setSettings(initialSettings);
+      if (initialSettings.banners && initialSettings.banners.length > 0) {
+        setBanners(initialSettings.banners);
+      }
     }
-  }, [initialMenus, initialSettings]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, initialMenus, initialSettings]);
 
   if (!isOpen) return null;
 
@@ -90,25 +98,33 @@ export default function AdminModal({
     setPinError('');
     setIsLoading(true);
 
+    const cleanPin = pin.trim();
+    if (!cleanPin) {
+      setPinError('Masukkan PIN admin.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const storedPin = localStorage.getItem('report_md_admin_pin') || '123456';
+      const storedPin = localStorage.getItem('report_md_admin_pin');
 
-      // Verify locally or with Apps Script
-      if (pin === storedPin || pin === '123456') {
-        setIsAuthenticated(true);
-        setIsLoading(false);
-        return;
-      }
-
-      // Try remote verification
+      // 1. Coba verifikasi remote ke Google Apps Script terlebih dahulu jika terhubung
+      let remoteChecked = false;
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         const res = await fetch(CMS_CONFIG.apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'getState', pin }),
+          body: JSON.stringify({ action: 'getState', pin: cleanPin }),
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
+
         if (res.ok) {
           const json = await res.json();
+          remoteChecked = true;
           if (json.ok && json.data) {
             setIsAuthenticated(true);
             if (json.data.menus) setMenus(json.data.menus);
@@ -116,13 +132,28 @@ export default function AdminModal({
               setSettings(json.data.settings);
               if (json.data.settings.banners) setBanners(json.data.settings.banners);
             }
-            localStorage.setItem('report_md_admin_pin', pin);
+            // Simpan PIN yang valid ke localStorage perangkat ini
+            localStorage.setItem('report_md_admin_pin', cleanPin);
+            setIsLoading(false);
+            return;
+          } else {
+            // Google Apps Script secara eksplisit menolak PIN
+            setPinError(json.message || 'PIN admin salah. Silakan periksa kembali.');
             setIsLoading(false);
             return;
           }
         }
       } catch {
-        // fallback
+        // Mode offline / jaringan lambat
+      }
+
+      // 2. Jika offline / server tidak dapat dihubungi:
+      // Hanya izinkan PIN yang tersimpan di perangkat ini (atau PIN bawaan jika BELUM pernah diganti)
+      const validLocalPin = storedPin || '123456';
+      if (!remoteChecked && cleanPin === validLocalPin) {
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        return;
       }
 
       setPinError('PIN admin salah. Silakan periksa kembali.');
@@ -139,54 +170,79 @@ export default function AdminModal({
     setPinMessage(null);
 
     const storedPin = localStorage.getItem('report_md_admin_pin') || '123456';
-    const activePin = pin || storedPin;
+    const activePin = pin.trim() || storedPin;
 
-    if (currentPin && currentPin !== storedPin && currentPin !== activePin && currentPin !== '123456') {
+    const cleanCurrent = currentPin.trim();
+    if (cleanCurrent && cleanCurrent !== activePin && cleanCurrent !== storedPin) {
       setPinMessage({ text: 'PIN lama yang Anda masukkan salah.', error: true });
       return;
     }
 
-    if (!newPin || newPin.trim().length < 4) {
+    const cleanNewPin = newPin.trim();
+    if (!cleanNewPin || cleanNewPin.length < 4) {
       setPinMessage({ text: 'PIN baru minimal harus 4-6 digit angka.', error: true });
       return;
     }
 
-    if (confirmPin && newPin !== confirmPin) {
+    if (confirmPin && cleanNewPin !== confirmPin.trim()) {
       setPinMessage({ text: 'Konfirmasi PIN tidak cocok dengan PIN baru.', error: true });
       return;
     }
 
     setIsLoading(true);
 
-    // Save locally immediately
-    const cleanNewPin = newPin.trim();
+    // Langsung simpan di localStorage agar PIN baru aktif seketika di perangkat ini
     localStorage.setItem('report_md_admin_pin', cleanNewPin);
     setPin(cleanNewPin);
 
-    // Attempt remote update with timeout
+    // Kirim pembaruan ke Google Apps Script (25s timeout untuk jaringan seluler)
+    let remoteSaved = false;
+    let serverErrorMsg = '';
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
 
-      await fetch(CMS_CONFIG.apiUrl, {
+      const res = await fetch(CMS_CONFIG.apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           action: 'changePin',
-          pin: currentPin || activePin,
+          pin: cleanCurrent || activePin,
           newPin: cleanNewPin,
         }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.ok) {
+          remoteSaved = true;
+        } else {
+          serverErrorMsg = json.message || 'Gagal mengubah di server';
+        }
+      }
     } catch {
-      // offline or Apps Script network latency, local update is already active
+      // Offline atau jaringan lambat, pembaruan lokal sudah aktif
     }
 
-    setPinMessage({
-      text: 'PIN berhasil diubah dan aktif! Gunakan PIN baru ini untuk login berikutnya.',
-      error: false,
-    });
+    if (remoteSaved) {
+      setPinMessage({
+        text: 'PIN berhasil diubah di database cloud & perangkat ini! PIN bawaan lama tidak dapat digunakan lagi.',
+        error: false,
+      });
+    } else if (serverErrorMsg) {
+      setPinMessage({
+        text: `PIN tersimpan di perangkat ini, namun server Google Sheets merespons: ${serverErrorMsg}. Pastikan kode Apps Script telah diperbarui ke versi terbaru.`,
+        error: false,
+      });
+    } else {
+      setPinMessage({
+        text: 'PIN berhasil diubah dan aktif! Gunakan PIN baru ini untuk login berikutnya.',
+        error: false,
+      });
+    }
+
     setCurrentPin('');
     setNewPin('');
     setConfirmPin('');
@@ -204,11 +260,15 @@ export default function AdminModal({
         ...m,
         urutan: Number(m.urutan || idx + 1),
         warna: m.warna && HEX_REGEX.test(m.warna) ? m.warna : '',
+        fotoUrl: m.fotoUrl ? String(m.fotoUrl).trim() : '',
       }));
 
       const cleanSettings: SiteSettings = {
         ...settings,
         banners,
+        watermarkText: (settings.watermarkText || 'Powered by Intisari').trim(),
+        watermarkEnabled: settings.watermarkEnabled !== false,
+        watermarkLink: (settings.watermarkLink || '').trim(),
       };
 
       // Update parent component state and local cache
@@ -230,7 +290,7 @@ export default function AdminModal({
       let serverSuccess = false;
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        const timeoutId = setTimeout(() => controller.abort(), 35000);
 
         const res = await fetch(CMS_CONFIG.apiUrl, {
           method: 'POST',
@@ -281,6 +341,7 @@ export default function AdminModal({
       deskripsi: 'Deskripsi laporan',
       warna: '',
       kategori: 'mobile',
+      fotoUrl: '',
     };
     setMenus([...menus, newItem]);
   };
@@ -315,6 +376,7 @@ export default function AdminModal({
       title: 'Judul Banner Baru',
       subtitle: 'Subjudul atau slogan tim',
       badgeText: 'Info Tambahan',
+      fitMode: 'contain',
     };
     setBanners([...banners, newSlide]);
   };
@@ -350,40 +412,120 @@ export default function AdminModal({
     }
   };
 
+  // Progressive multi-step high-quality downscaler to preserve crisp HD edges & text
+  const renderHighQualityCanvas = (
+    img: HTMLImageElement,
+    maxW: number,
+    maxH: number
+  ): HTMLCanvasElement => {
+    let targetW = img.naturalWidth || img.width;
+    let targetH = img.naturalHeight || img.height;
+    if (targetW > maxW || targetH > maxH) {
+      const ratio = Math.min(maxW / targetW, maxH / targetH);
+      targetW = Math.max(1, Math.round(targetW * ratio));
+      targetH = Math.max(1, Math.round(targetH * ratio));
+    }
+
+    // Step down progressively by 50% if source image is >2x larger than target
+    let curSource: CanvasImageSource = img;
+    let curW = img.naturalWidth || img.width;
+    let curH = img.naturalHeight || img.height;
+
+    while (curW * 0.5 > targetW && curH * 0.5 > targetH) {
+      const nextW = Math.max(targetW, Math.round(curW * 0.5));
+      const nextH = Math.max(targetH, Math.round(curH * 0.5));
+      const stepCanvas = document.createElement('canvas');
+      stepCanvas.width = nextW;
+      stepCanvas.height = nextH;
+      const stepCtx = stepCanvas.getContext('2d');
+      if (!stepCtx) break;
+      stepCtx.imageSmoothingEnabled = true;
+      stepCtx.imageSmoothingQuality = 'high';
+      stepCtx.drawImage(curSource, 0, 0, nextW, nextH);
+      curSource = stepCanvas;
+      curW = nextW;
+      curH = nextH;
+    }
+
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = targetW;
+    finalCanvas.height = targetH;
+    const finalCtx = finalCanvas.getContext('2d');
+    if (finalCtx) {
+      finalCtx.imageSmoothingEnabled = true;
+      finalCtx.imageSmoothingQuality = 'high';
+      finalCtx.drawImage(curSource, 0, 0, targetW, targetH);
+    }
+    return finalCanvas;
+  };
+
+  const encodeHdBannerDataUrl = (img: HTMLImageElement): { dataUrl: string; width: number; height: number } => {
+    // Keep strictly <= 130,000 base64 chars so it fits cleanly inside Google Sheets 3-chunk (135k) limit
+    const MAX_BASE64_CHARS = 130000;
+    const dimensionTiers = [
+      { maxW: 1600, maxH: 900 },
+      { maxW: 1366, maxH: 768 },
+      { maxW: 1152, maxH: 648 },
+    ];
+    const qualities = [0.92, 0.86, 0.80, 0.74];
+
+    let bestUrl = '';
+    let bestW = 0;
+    let bestH = 0;
+
+    for (const tier of dimensionTiers) {
+      const canvas = renderHighQualityCanvas(img, tier.maxW, tier.maxH);
+      bestW = canvas.width;
+      bestH = canvas.height;
+
+      for (const q of qualities) {
+        // Prefer WebP for superior HD sharpness per KB; fall back to JPEG if unsupported
+        const webpCandidate = canvas.toDataURL('image/webp', q);
+        const candidate = webpCandidate.startsWith('data:image/webp')
+          ? webpCandidate
+          : canvas.toDataURL('image/jpeg', q);
+
+        bestUrl = candidate;
+        if (candidate.length <= MAX_BASE64_CHARS) {
+          return { dataUrl: candidate, width: bestW, height: bestH };
+        }
+      }
+    }
+
+    return { dataUrl: bestUrl, width: bestW, height: bestH };
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || uploadTargetIdx === null) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran gambar maksimal 5MB.');
+    if (file.size > 15 * 1024 * 1024) {
+      setSaveStatus('⚠️ Ukuran file maksimal 15MB. Silakan pilih gambar lain.');
       return;
     }
 
-    // Compress banner image to 640x260 JPEG 0.68 (~15KB base64, fits cleanly in Google Sheets)
+    const targetIndex = uploadTargetIdx;
     const img = new Image();
     const reader = new FileReader();
     reader.onload = (uploadEvent) => {
       img.src = uploadEvent.target?.result as string;
       img.onload = () => {
-        let w = img.width;
-        let h = img.height;
-        const maxW = 640;
-        const maxH = 260;
-        if (w > maxW || h > maxH) {
-          const ratio = Math.min(maxW / w, maxH / h);
-          w = Math.round(w * ratio);
-          h = Math.round(h * ratio);
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, w, h);
-          const compressed = canvas.toDataURL('image/jpeg', 0.68);
-          const next = [...banners];
-          next[uploadTargetIdx].imageUrl = compressed;
-          setBanners(next);
+        const { dataUrl, width, height } = encodeHdBannerDataUrl(img);
+        if (dataUrl) {
+          setBanners((prev) => {
+            const next = [...prev];
+            if (next[targetIndex]) {
+              next[targetIndex] = {
+                ...next[targetIndex],
+                imageUrl: dataUrl,
+                fitMode: next[targetIndex].fitMode || 'contain',
+              };
+            }
+            return next;
+          });
+          setSaveStatus(
+            `✅ Foto banner berhasil dioptimalkan ke kualitas HD (${width}×${height} px). Klik SIMPAN PERUBAHAN.`
+          );
         }
       };
     };
@@ -393,13 +535,19 @@ export default function AdminModal({
   const convertGoogleDriveUrl = (url: string): string => {
     if (!url) return '';
     const trimmed = url.trim();
+    if (trimmed.startsWith('data:image/')) return trimmed;
+
     const matchFile = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (matchFile && matchFile[1]) {
-      return `https://lh3.googleusercontent.com/d/${matchFile[1]}`;
+      return `https://lh3.googleusercontent.com/d/${matchFile[1]}=w1920`;
     }
     const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
     if (matchId && matchId[1] && trimmed.includes('drive.google.com')) {
-      return `https://lh3.googleusercontent.com/d/${matchId[1]}`;
+      return `https://lh3.googleusercontent.com/d/${matchId[1]}=w1920`;
+    }
+    const matchLh3 = trimmed.match(/^https:\/\/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)$/);
+    if (matchLh3 && matchLh3[1]) {
+      return `https://lh3.googleusercontent.com/d/${matchLh3[1]}=w1920`;
     }
     return trimmed;
   };
@@ -446,6 +594,51 @@ export default function AdminModal({
     reader.readAsDataURL(file);
   };
 
+  const triggerMenuPhotoUpload = (idx: number) => {
+    setUploadMenuIdx(idx);
+    if (menuPhotoInputRef.current) {
+      menuPhotoInputRef.current.value = '';
+      menuPhotoInputRef.current.click();
+    }
+  };
+
+  const handleMenuPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || uploadMenuIdx === null) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      alert('Ukuran foto maksimal 8MB.');
+      return;
+    }
+
+    // Compress photo to 200x200 square avatar JPEG 0.75 (~8-12KB base64, fits cleanly in Google Sheets)
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      img.src = uploadEvent.target?.result as string;
+      img.onload = () => {
+        // Crop center square for crisp round avatar (compact 160x160 JPEG ~5-8KB base64)
+        const size = Math.min(img.width, img.height);
+        const startX = (img.width - size) / 2;
+        const startY = (img.height - size) / 2;
+        const targetDim = 160;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetDim;
+        canvas.height = targetDim;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, startX, startY, size, size, 0, 0, targetDim, targetDim);
+          const compressed = canvas.toDataURL('image/jpeg', 0.72);
+          const next = [...menus];
+          next[uploadMenuIdx].fotoUrl = compressed;
+          setMenus(next);
+        }
+      };
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/65 backdrop-blur-xs animate-in fade-in duration-200">
       {/* Hidden File Input for Banners */}
@@ -462,6 +655,15 @@ export default function AdminModal({
         type="file"
         ref={logoFileInputRef}
         onChange={handleLogoFileUpload}
+        accept="image/*"
+        className="hidden"
+      />
+
+      {/* Hidden File Input for Menu / MD Photo */}
+      <input
+        type="file"
+        ref={menuPhotoInputRef}
+        onChange={handleMenuPhotoUpload}
         accept="image/*"
         className="hidden"
       />
@@ -592,17 +794,17 @@ export default function AdminModal({
                   <div className="p-3.5 bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/80 rounded-2xl text-xs space-y-1.5 shadow-2xs">
                     <div className="font-bold text-[#1244a5] flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
-                      <span>Petunjuk Menambahkan Gambar ke Slide Bar:</span>
+                      <span>Petunjuk Gambar Banner Kualitas HD & Landscape Utuh:</span>
                     </div>
                     <ul className="list-disc pl-4 space-y-1 text-[11px] text-slate-700">
                       <li>
-                        <strong>Cara 1 (Paling Mudah):</strong> Klik tombol <strong>Pilih File</strong> untuk mengambil gambar langsung dari galeri HP atau laptop. Otomatis disesuaikan ukurannya.
+                        <strong>Kualitas HD Otomatis:</strong> Klik <strong>Pilih File</strong> (hingga resolusi 1600×900 HD tajam) atau tempel link <strong>Google Drive</strong> (otomatis dimuat dalam Full HD 1920px). <em>Jika ada banner lama yang sebelumnya buram, cukup unggah ulang fotonya sekali lewat Pilih File.</em>
                       </li>
                       <li>
-                        <strong>Cara 2 (Google Drive):</strong> Tempel link Google Drive. <em>Wajib ubah Akses Umum di Google Drive menjadi <strong>&quot;Siapa saja yang memiliki link&quot;</strong></em> agar bisa dimuat oleh semua pengguna.
+                        <strong>Landscape Tidak Terpotong:</strong> Gunakan mode <strong>&quot;Utuh Tanpa Terpotong (Landscape)&quot;</strong> agar seluruh isi poster/foto melebar tampil penuh tanpa terpotong kiri-kanan maupun atas-bawah.
                       </li>
                       <li>
-                        <strong>Wajib Klik Simpan:</strong> Setelah selesai menambah foto, klik tombol biru <strong>SIMPAN PERUBAHAN</strong> di kanan bawah agar langsung tampil di layar!
+                        <strong>Wajib Klik Simpan:</strong> Setelah selesai mengatur foto, klik tombol biru <strong>SIMPAN PERUBAHAN</strong> di kanan bawah!
                       </li>
                     </ul>
                   </div>
@@ -680,11 +882,13 @@ export default function AdminModal({
                               <span className="w-6 h-6 rounded-lg bg-blue-100 text-[#1244a5] text-xs font-bold flex items-center justify-center shrink-0">
                                 {idx + 1}
                               </span>
-                              <div className="w-24 sm:w-32 h-14 rounded-xl overflow-hidden bg-slate-200 border border-slate-300 shrink-0 shadow-2xs relative">
+                              <div className="w-28 sm:w-36 h-16 rounded-xl overflow-hidden bg-slate-900 border border-slate-300 shrink-0 shadow-2xs relative">
                                 <img
                                   src={displayImg}
                                   alt={`Slide ${idx + 1}`}
-                                  className="w-full h-full object-cover"
+                                  className={`w-full h-full ${
+                                    slide.fitMode === 'cover' ? 'object-cover' : 'object-contain'
+                                  }`}
                                   referrerPolicy="no-referrer"
                                   onError={(e) => {
                                     (e.target as HTMLImageElement).src = PRESET_IMAGES[0].url;
@@ -692,9 +896,14 @@ export default function AdminModal({
                                 />
                               </div>
                               <div className="min-w-0">
-                                <h5 className="font-bold text-xs sm:text-sm text-slate-800 truncate">
-                                  {slide.title || '(Tanpa Judul Teks)'}
-                                </h5>
+                                <div className="flex items-center gap-1.5">
+                                  <h5 className="font-bold text-xs sm:text-sm text-slate-800 truncate">
+                                    {slide.title || '(Tanpa Judul Teks)'}
+                                  </h5>
+                                  <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] font-extrabold shrink-0">
+                                    HD
+                                  </span>
+                                </div>
                                 <p className="text-[11px] text-slate-500 truncate">
                                   {slide.hideOverlay
                                     ? '🖼️ Mode Gambar Penuh (Tanpa pita biru)'
@@ -784,21 +993,49 @@ export default function AdminModal({
                             </div>
                           </div>
 
-                          {/* Mode Gambar Penuh Checkbox */}
-                          <div className="pt-1 pb-1">
-                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer select-none bg-white p-2 rounded-xl border border-slate-200 hover:border-blue-300 transition-colors">
+                          {/* Proporsi Landscape & Mode Gambar Penuh */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 pb-1">
+                            <div className="bg-white p-2.5 rounded-xl border border-slate-200">
+                              <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                                Tampilan Proporsi Gambar:
+                              </label>
+                              <select
+                                value={slide.fitMode || 'contain'}
+                                onChange={(e) => {
+                                  const next = [...banners];
+                                  next[idx] = {
+                                    ...next[idx],
+                                    fitMode: e.target.value as 'contain' | 'cover',
+                                  };
+                                  setBanners(next);
+                                }}
+                                className="w-full text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-600 cursor-pointer"
+                              >
+                                <option value="contain">
+                                  Utuh Tanpa Terpotong (Rekomendasi Landscape)
+                                </option>
+                                <option value="cover">
+                                  Penuhi Bingkai (Cover)
+                                </option>
+                              </select>
+                            </div>
+
+                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer select-none bg-white p-2.5 rounded-xl border border-slate-200 hover:border-blue-300 transition-colors">
                               <input
                                 type="checkbox"
                                 checked={Boolean(slide.hideOverlay)}
                                 onChange={(e) => {
                                   const next = [...banners];
-                                  next[idx].hideOverlay = e.target.checked;
+                                  next[idx] = {
+                                    ...next[idx],
+                                    hideOverlay: e.target.checked,
+                                  };
                                   setBanners(next);
                                 }}
-                                className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                                className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer shrink-0"
                               />
-                              <span>
-                                🖼️ <strong>Tampilkan Gambar Penuh:</strong> Sembunyikan pita biru agar gambar/poster banner tampil utuh tanpa tertutup teks.
+                              <span className="leading-snug">
+                                🖼️ <strong>Sembunyikan Pita Teks:</strong> Tampilkan murni poster/foto tanpa pita biru.
                               </span>
                             </label>
                           </div>
@@ -1028,6 +1265,82 @@ export default function AdminModal({
                             )}
                           </div>
                         </div>
+
+                        {/* FOTO / ICON PERSONEL MD */}
+                        <div className="pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2.5 bg-white/70 p-2.5 rounded-xl">
+                          <div className="flex items-center gap-2.5">
+                            {/* Avatar Preview */}
+                            <div className="relative w-10 h-10 rounded-full bg-slate-100 border-2 border-blue-200 flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
+                              {item.fotoUrl ? (
+                                <img
+                                  src={convertGoogleDriveUrl(item.fotoUrl)}
+                                  alt={item.nama}
+                                  referrerPolicy="no-referrer"
+                                  className="w-full h-full object-cover rounded-full"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <User className="w-5 h-5 text-slate-400" />
+                              )}
+                            </div>
+
+                            <div className="flex flex-col">
+                              <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                <Camera className="w-3.5 h-3.5 text-blue-600" />
+                                <span>Foto / Icon MD</span>
+                              </span>
+                              <span className="text-[10px] text-slate-400">
+                                {item.fotoUrl ? 'Foto MD kustom terpasang' : 'Menggunakan icon bawaan'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => triggerMenuPhotoUpload(idx)}
+                              className="flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200/80 transition-colors cursor-pointer"
+                              title="Pilih foto dari HP/Laptop"
+                            >
+                              <Upload className="w-3 h-3" />
+                              <span>{item.fotoUrl ? 'Ganti Foto' : 'Unggah Foto MD'}</span>
+                            </button>
+
+                            {item.fotoUrl && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const next = [...menus];
+                                  next[idx].fotoUrl = '';
+                                  setMenus(next);
+                                }}
+                                className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 px-2 py-1 rounded-lg transition-colors cursor-pointer"
+                                title="Hapus foto dan kembali ke icon bawaan"
+                              >
+                                <X className="w-3 h-3" />
+                                <span>Hapus</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Optional Direct URL / Google Drive link input */}
+                        <div className="flex items-center gap-1.5 px-1">
+                          <span className="text-[10px] font-medium text-slate-400 shrink-0">Atau Link Foto:</span>
+                          <input
+                            type="text"
+                            value={item.fotoUrl || ''}
+                            onChange={(e) => {
+                              const next = [...menus];
+                              next[idx].fotoUrl = convertGoogleDriveUrl(e.target.value);
+                              setMenus(next);
+                            }}
+                            placeholder="URL gambar atau link Google Drive (https://...)"
+                            className="flex-1 text-[11px] text-slate-600 bg-white border border-slate-200 rounded-md px-2 py-0.5 focus:border-blue-500 outline-none"
+                          />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1197,6 +1510,94 @@ export default function AdminModal({
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Watermark & Footer Branding */}
+                  <div className="space-y-3.5 pt-4 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-blue-500" />
+                          Watermark & Branding Halaman
+                        </h3>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Tampilkan identitas pembuat / watermark di bagian bawah aplikasi.
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={settings.watermarkEnabled !== false}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              watermarkEnabled: e.target.checked,
+                            })
+                          }
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1244a5]"></div>
+                      </label>
+                    </div>
+
+                    {settings.watermarkEnabled !== false && (
+                      <div className="space-y-3 p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/80">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            Teks Watermark
+                          </label>
+                          <input
+                            type="text"
+                            value={settings.watermarkText ?? 'Powered by Intisari'}
+                            onChange={(e) =>
+                              setSettings({
+                                ...settings,
+                                watermarkText: e.target.value,
+                              })
+                            }
+                            placeholder="Contoh: Powered by Intisari"
+                            className="w-full text-sm font-medium text-slate-800 bg-white border border-slate-300 rounded-xl px-3 py-2 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                          />
+                          <p className="text-[10px] text-slate-400 mt-1">
+                            Teks ini tampil di bagian bawah halaman beranda dan pada modal informasi.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            Tautan URL (Opsional)
+                          </label>
+                          <input
+                            type="url"
+                            value={settings.watermarkLink || ''}
+                            onChange={(e) =>
+                              setSettings({
+                                ...settings,
+                                watermarkLink: e.target.value,
+                              })
+                            }
+                            placeholder="https://... (kosongkan jika tidak ingin tautan klik)"
+                            className="w-full text-sm text-slate-800 bg-white border border-slate-300 rounded-xl px-3 py-2 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                          />
+                        </div>
+
+                        {/* Live Preview Box */}
+                        <div className="pt-2">
+                          <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                            Pratinjau Tampilan Watermark:
+                          </span>
+                          <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50/50 rounded-xl border border-blue-100 flex items-center justify-center">
+                            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white text-slate-600 text-xs font-semibold border border-blue-100 shadow-2xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              <span>{settings.watermarkText || 'Powered by Intisari'}</span>
+                              {settings.watermarkLink && (
+                                <span className="text-[10px] text-blue-500">&rarr;</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

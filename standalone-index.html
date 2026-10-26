@@ -50,7 +50,7 @@
   <div class="fixed top-1/2 -left-40 w-96 h-96 rounded-full bg-indigo-200/20 blur-3xl pointer-events-none"></div>
 
   <!-- Main Container -->
-  <div class="max-w-[840px] mx-auto px-3.5 sm:px-5 md:px-6 pt-4 sm:pt-6 space-y-4 sm:space-y-5">
+  <div class="max-w-[920px] mx-auto px-3.5 sm:px-5 md:px-6 pt-3 sm:pt-5 space-y-2.5 sm:space-y-3.5">
 
     <!-- 1. HEADER (BTB Logo + Title + CMS Status) -->
     <header class="flex items-center justify-between gap-3 pt-1 pb-1">
@@ -107,26 +107,28 @@
       </div>
     </header>
 
-    <!-- 2. HERO SLIDER (Auto-Slide Carousel) -->
-    <div id="heroSlider" class="group relative w-full overflow-hidden rounded-2xl md:rounded-3xl shadow-lg shadow-blue-900/10 bg-slate-900 aspect-[16/6] min-h-[145px] max-h-[220px] select-none">
-      <div id="slidesContainer" class="relative w-full h-full"></div>
+    <!-- 2. HERO SLIDER (Auto-Slide Carousel, Wider Landscape & HD) -->
+    <div class="-mx-1.5 sm:-mx-1 md:mx-0">
+      <div id="heroSlider" class="group relative w-full overflow-hidden rounded-2xl md:rounded-3xl shadow-lg shadow-blue-900/12 bg-slate-900 aspect-[16/8.6] min-h-[125px] max-h-[500px] select-none ring-1 ring-blue-950/10">
+        <div id="slidesContainer" class="relative w-full h-full"></div>
 
-      <!-- Arrow Controls -->
-      <button id="prevSlideBtn" type="button" class="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/35 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-xs cursor-pointer shadow-sm">
-        &#10094;
-      </button>
-      <button id="nextSlideBtn" type="button" class="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/35 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-xs cursor-pointer shadow-sm">
-        &#10095;
-      </button>
+        <!-- Arrow Controls -->
+        <button id="prevSlideBtn" type="button" class="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/35 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-xs cursor-pointer shadow-sm">
+          &#10094;
+        </button>
+        <button id="nextSlideBtn" type="button" class="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/35 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-xs cursor-pointer shadow-sm">
+          &#10095;
+        </button>
 
-      <!-- Dot Indicators -->
-      <div id="slideDots" class="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/25 backdrop-blur-xs"></div>
+        <!-- Dot Indicators -->
+        <div id="slideDots" class="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/25 backdrop-blur-xs"></div>
+      </div>
     </div>
 
-    <!-- 3. SEARCH & CATEGORY FILTER BAR -->
+    <!-- 3. COMPACT SEARCH & CATEGORY FILTER BAR -->
     <div class="relative w-full">
       <div class="relative flex items-center">
-        <svg class="absolute left-4 w-5 h-5 text-[#164fc1] pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="absolute left-3 w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#164fc1]/80 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
@@ -135,16 +137,16 @@
           id="searchInput"
           type="text"
           placeholder="Cari menu atau nama MD..."
-          class="w-full h-13 sm:h-14 pl-12 pr-12 rounded-full border-2 border-[#5aa9ff]/70 bg-white/95 text-[#163f73] font-medium text-sm sm:text-base shadow-md shadow-blue-500/10 placeholder:text-slate-400 focus:outline-none focus:border-[#164fc1] focus:ring-4 focus:ring-blue-100 transition-all"
+          class="w-full h-9 sm:h-[38px] pl-9 sm:pl-9.5 pr-10 rounded-xl border border-blue-200/90 bg-white/90 text-[#163f73] font-medium text-xs sm:text-[13px] shadow-2xs placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#164fc1] focus:ring-2 focus:ring-blue-100/80 transition-all"
         >
 
         <button
           id="filterToggleBtn"
           type="button"
-          class="absolute right-3.5 w-8 h-8 rounded-full flex items-center justify-center text-[#164fc1] hover:bg-slate-100 transition-colors cursor-pointer"
+          class="absolute right-1.5 w-7 h-7 rounded-lg flex items-center justify-center text-[#164fc1]/85 hover:bg-slate-100 transition-colors cursor-pointer"
           title="Filter Kategori"
         >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" y1="21" x2="4" y2="14"></line>
             <line x1="4" y1="10" x2="4" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="12"></line>
@@ -158,13 +160,13 @@
         </button>
       </div>
 
-      <!-- Quick Category Chips -->
-      <div id="categoryBar" class="hidden flex items-center gap-1.5 overflow-x-auto py-2.5 px-1 scrollbar-none"></div>
+      <!-- Compact Segmented Category Filter -->
+      <div id="categoryBar" class="hidden flex items-center gap-1 overflow-x-auto mt-1.5 p-1 bg-white/75 border border-blue-100/80 rounded-xl scrollbar-none"></div>
     </div>
 
     <!-- 4. CARDS GRID (2 Columns on mobile) -->
     <main class="w-full">
-      <div id="cardGrid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 w-full"></div>
+      <div id="cardGrid" class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5 md:gap-4 w-full"></div>
     </main>
 
     <!-- 5. NEWS / ANNOUNCEMENT TICKER -->
@@ -184,6 +186,14 @@
       <button id="openDetailBtn" type="button" class="text-xs sm:text-sm font-bold text-[#176fd0] hover:text-[#0d47a1] shrink-0 transition-colors px-2 py-1 rounded-lg hover:bg-blue-50 cursor-pointer">
         Lihat Detail &rarr;
       </button>
+    </div>
+
+    <!-- WATERMARK ("Powered by Intisari") -->
+    <div id="watermarkContainer" class="flex flex-col items-center justify-center pt-1 pb-4 select-none">
+      <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/60 text-slate-500 text-[11px] sm:text-xs font-semibold border border-blue-100/70 shadow-2xs backdrop-blur-xs">
+        <span class="w-1.5 h-1.5 rounded-full bg-blue-500/80"></span>
+        <span id="watermarkText">Powered by Intisari</span>
+      </div>
     </div>
 
   </div>
@@ -486,20 +496,40 @@
       return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M8 13h2"></path><path d="M8 17h2"></path><path d="M14 13h2"></path><path d="M14 17h2"></path></svg>`;
     }
 
-    // Convert Google Drive Links to Direct Image URLs
+    // Convert Google Drive Links to Direct Full HD 1920px Image URLs
     function convertGoogleDriveUrl(url) {
       if (!url) return "";
       const trimmed = String(url).trim();
+      if (trimmed.startsWith("data:image/")) return trimmed;
       const matchFile = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
       if (matchFile && matchFile[1]) {
-        return `https://lh3.googleusercontent.com/d/${matchFile[1]}`;
+        return `https://lh3.googleusercontent.com/d/${matchFile[1]}=w1920`;
       }
       const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       if (matchId && matchId[1] && trimmed.includes('drive.google.com')) {
-        return `https://lh3.googleusercontent.com/d/${matchId[1]}`;
+        return `https://lh3.googleusercontent.com/d/${matchId[1]}=w1920`;
+      }
+      const matchLh3 = trimmed.match(/^https:\/\/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)$/);
+      if (matchLh3 && matchLh3[1]) {
+        return `https://lh3.googleusercontent.com/d/${matchLh3[1]}=w1920`;
       }
       return trimmed;
     }
+
+    window.syncPrimaryHeroAspect = function(imgEl) {
+      if (!imgEl || !imgEl.naturalWidth || !imgEl.naturalHeight) return;
+      const ratio = imgEl.naturalWidth / imgEl.naturalHeight;
+      const slider = document.getElementById("heroSlider");
+      if (!slider) return;
+      let aspectCls = "aspect-[16/8.6]";
+      if (ratio < 1.66) aspectCls = "aspect-[16/10]";
+      else if (ratio < 1.88) aspectCls = "aspect-[16/9]";
+      else if (ratio < 2.10) aspectCls = "aspect-[2/1]";
+      else if (ratio < 2.34) aspectCls = "aspect-[22/10]";
+      else if (ratio < 2.62) aspectCls = "aspect-[12/5]";
+      else aspectCls = "aspect-[28/10]";
+      slider.className = `group relative w-full overflow-hidden rounded-2xl md:rounded-3xl shadow-lg shadow-blue-900/12 bg-slate-900 ${aspectCls} min-h-[125px] max-h-[500px] select-none ring-1 ring-blue-950/10`;
+    };
 
     // Render Hero Slider
     function renderHeroSlider() {
@@ -511,13 +541,15 @@
         const imgUrl = convertGoogleDriveUrl(s.imageUrl);
         const hasText = Boolean((s.scriptText && s.scriptText.trim()) || (s.title && s.title.trim()) || (s.subtitle && s.subtitle.trim()));
         const showOverlay = !s.hideOverlay && hasText;
+        const useContain = s.fitMode !== 'cover';
 
         return `
         <div class="slide-item absolute inset-0 transition-opacity duration-700 ease-in-out ${i === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}">
-          <img src="${esc(imgUrl)}" alt="${esc(s.title || '')}" class="absolute inset-0 w-full h-full object-cover object-center scale-105 transition-transform duration-1000 ease-out group-hover:scale-100" onerror="this.src='${DEFAULT_SLIDES[0].imageUrl}'">
-          ${showOverlay ? `<div class="absolute inset-0 bg-gradient-to-r from-blue-950/80 via-transparent to-transparent pointer-events-none"></div>` : ''}
+          ${useContain ? `<img src="${esc(imgUrl)}" alt="" aria-hidden="true" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover object-center scale-110 blur-xl opacity-65 brightness-75 pointer-events-none">` : ''}
+          <img src="${esc(imgUrl)}" alt="${esc(s.title || '')}" decoding="async" referrerpolicy="no-referrer" ${i === 0 ? 'onload="syncPrimaryHeroAspect(this)"' : ''} class="relative z-[1] w-full h-full ${useContain ? 'object-contain' : 'object-cover'} object-center" onerror="this.src='${DEFAULT_SLIDES[0].imageUrl}'">
+          ${showOverlay ? `<div class="absolute inset-0 z-[2] bg-gradient-to-r from-blue-950/80 via-transparent to-transparent pointer-events-none"></div>` : ''}
           ${showOverlay ? `
-          <div class="absolute inset-y-0 left-0 w-[64%] sm:w-[58%] md:w-[50%] bg-gradient-to-r from-[#0d3b82]/95 via-[#1a56b7]/90 to-transparent flex flex-col justify-center px-4 sm:px-6 md:px-7 z-10">
+          <div class="absolute inset-y-0 left-0 w-[62%] sm:w-[56%] md:w-[48%] bg-gradient-to-r from-[#0d3b82]/95 via-[#1a56b7]/88 to-transparent flex flex-col justify-center px-4 sm:px-6 md:px-7 z-10 pointer-events-none">
             ${s.scriptText ? `<span class="font-script text-white text-xl sm:text-2xl md:text-3xl font-bold -mb-1 drop-shadow">${esc(s.scriptText)}</span>` : ''}
             ${s.title ? `<h2 class="text-white font-extrabold text-sm sm:text-base md:text-xl lg:text-2xl leading-tight tracking-tight drop-shadow-md line-clamp-2">${esc(s.title)}</h2>` : ''}
             ${s.subtitle ? `<p class="text-blue-100 text-[10px] sm:text-xs md:text-sm font-medium mt-0.5 drop-shadow line-clamp-1">${esc(s.subtitle)}</p>` : ''}
@@ -593,22 +625,26 @@
             target="${disabled ? '' : '_blank'}"
             rel="${disabled ? '' : 'noopener noreferrer'}"
             style="background: ${style.bg};"
-            class="group relative flex flex-col justify-between p-3.5 sm:p-4 md:p-5 rounded-2xl md:rounded-[22px] min-h-[160px] sm:min-h-[175px] md:min-h-[185px] shadow-md shadow-blue-900/10 transition-all duration-200 overflow-hidden select-none border border-white/20 ${disabled ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-1 hover:shadow-xl cursor-pointer'}"
+            class="group relative flex flex-col justify-between p-3 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl min-h-[142px] sm:min-h-[150px] md:min-h-[160px] shadow-sm shadow-blue-900/10 transition-all duration-200 overflow-hidden select-none border border-white/20 ${disabled ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-0.5 hover:shadow-lg cursor-pointer'}"
           >
-            <div class="absolute -top-1 -right-1 w-24 h-24 sm:w-28 sm:h-28 text-white opacity-[0.14] pointer-events-none group-hover:scale-110 transition-transform">
+            <div class="absolute -top-1 -right-1 w-20 h-20 sm:w-24 sm:h-24 text-white opacity-[0.11] pointer-events-none group-hover:scale-110 transition-transform">
               ${getIconSVG(style.icon, 'w-full h-full stroke-[1.8]')}
             </div>
             <div class="relative z-10 flex items-center justify-between">
-              <div class="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full bg-white shadow-md flex items-center justify-center shrink-0">
-                <span style="color:${style.color};">${getIconSVG(style.icon, 'w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]')}</span>
+              <div class="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-white shadow-xs flex items-center justify-center shrink-0 overflow-hidden ring-2 ring-white/80">
+                ${m.fotoUrl ? `
+                  <img src="${esc(convertGoogleDriveUrl(m.fotoUrl))}" alt="${esc(m.nama)}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-full" onerror="this.outerHTML='<span style=\\'color:${style.color};\\'>${getIconSVG(style.icon, 'w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[2.2]')}</span>'">
+                ` : `
+                  <span style="color:${style.color};">${getIconSVG(style.icon, 'w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[2.2]')}</span>
+                `}
               </div>
             </div>
-            <div class="relative z-10 mt-3 sm:mt-4 pr-7 sm:pr-8">
-              <h3 class="font-extrabold text-white text-xs sm:text-sm md:text-base leading-snug tracking-tight drop-shadow-xs line-clamp-2">${esc(m.nama)}</h3>
-              <p class="text-white/85 text-[11px] sm:text-xs md:text-[13px] leading-tight font-normal mt-1 line-clamp-2 drop-shadow-xs">${disabled ? 'Belum tersedia' : esc(m.deskripsi || 'Klik untuk membuka laporan')}</p>
+            <div class="relative z-10 mt-2 sm:mt-2.5 pr-6 sm:pr-7">
+              <h3 class="font-extrabold text-white text-[12px] sm:text-[13px] md:text-[14.5px] leading-snug tracking-tight drop-shadow-xs line-clamp-2">${esc(m.nama)}</h3>
+              <p class="text-white/85 text-[10.5px] sm:text-[11px] md:text-xs leading-tight font-normal mt-0.5 line-clamp-2 drop-shadow-xs">${disabled ? 'Belum tersedia' : esc(m.deskripsi || 'Klik untuk membuka laporan')}</p>
             </div>
-            <div class="absolute right-3 bottom-3 sm:right-3.5 sm:bottom-3.5 md:right-4 md:bottom-4 z-10">
-              <div class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-white/20 group-hover:bg-white/35 text-white flex items-center justify-center transition-all duration-200 backdrop-blur-xs">
+            <div class="absolute right-2.5 bottom-2.5 sm:right-3 sm:bottom-3 md:right-3.5 md:bottom-3.5 z-10">
+              <div class="w-5.5 h-5.5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full bg-white/20 group-hover:bg-white/35 active:scale-90 text-white flex items-center justify-center transition-all duration-200 backdrop-blur-xs shadow-2xs">
                 &rarr;
               </div>
             </div>
@@ -652,6 +688,33 @@
           <span class="font-extrabold text-2xl md:text-3xl text-[#EAB308] drop-shadow-[0_1.5px_0_#1E3A8A]">${esc(st.logoText || 'BTB')}</span>
         `;
       }
+
+      // Watermark display
+      const wmBox = document.getElementById("watermarkContainer");
+      if (wmBox) {
+        if (st.watermarkEnabled === false || st.watermarkEnabled === "false") {
+          wmBox.style.display = "none";
+        } else {
+          wmBox.style.display = "flex";
+          const wmText = st.watermarkText || "Powered by Intisari";
+          if (st.watermarkLink) {
+            wmBox.innerHTML = `
+              <a href="${esc(st.watermarkLink)}" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/70 hover:bg-white text-slate-500 hover:text-[#1244a5] text-[11px] sm:text-xs font-semibold border border-blue-100 shadow-2xs backdrop-blur-xs transition-all hover:shadow-xs">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 group-hover:bg-emerald-500 transition-colors"></span>
+                <span class="tracking-wide">${esc(wmText)}</span>
+                <span class="text-[10px] text-blue-400 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+              </a>
+            `;
+          } else {
+            wmBox.innerHTML = `
+              <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/60 text-slate-500 text-[11px] sm:text-xs font-semibold border border-blue-100/70 shadow-2xs backdrop-blur-xs">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500/80"></span>
+                <span class="tracking-wide">${esc(wmText)}</span>
+              </div>
+            `;
+          }
+        }
+      }
     }
 
     // Category Buttons
@@ -665,7 +728,7 @@
       { id: 'stay', label: 'MD Stay' }
     ];
     catBar.innerHTML = categories.map(c => `
-      <button type="button" onclick="setCategory('${c.id}')" class="cat-btn px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${c.id === 'all' ? 'bg-[#1244a5] text-white' : 'bg-white/80 text-slate-600 border border-slate-200'}">
+      <button type="button" onclick="setCategory('${c.id}')" class="cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer ${c.id === 'all' ? 'bg-[#1244a5] text-white' : 'text-slate-600 hover:bg-white hover:text-[#1244a5]'}">
         ${c.label}
       </button>
     `).join("");
@@ -674,9 +737,9 @@
       currentCategory = catId;
       document.querySelectorAll(".cat-btn").forEach((btn, idx) => {
         if (categories[idx].id === catId) {
-          btn.className = "cat-btn px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-[#1244a5] text-white";
+          btn.className = "cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap bg-[#1244a5] text-white";
         } else {
-          btn.className = "cat-btn px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white/80 text-slate-600 border border-slate-200";
+          btn.className = "cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap text-slate-600 hover:bg-white hover:text-[#1244a5]";
         }
       });
       renderCards(document.getElementById("searchInput").value);
@@ -725,40 +788,124 @@
       };
     } catch {}
 
-    // Load from CMS
+    // Concurrency guard and fail counter for mobile data
+    let isFetchingCMS = false;
+    let failSyncCount = 0;
+
+    // Load from CMS with resilient Fetch + JSONP dual transport
     async function loadCMS(isSilent = false) {
+      if (isFetchingCMS) return;
+      isFetchingCMS = true;
+
       const statusDot = document.getElementById("statusDot");
       const cmsStatus = document.getElementById("cmsStatus");
+
       try {
         if (!isSilent) {
           const cached = localStorage.getItem(CMS_CONFIG.cacheKey);
           if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed.data && parsed.data.length) state.menus = parsed.data;
-            if (parsed.settings) state.settings = { ...state.settings, ...parsed.settings };
-            if (parsed.time) lastSyncDate = new Date(parsed.time);
-            applyBrandSettings();
-            renderHeroSlider();
-            renderCards();
+            try {
+              const parsed = JSON.parse(cached);
+              if (parsed.data && parsed.data.length) state.menus = parsed.data;
+              if (parsed.settings) state.settings = { ...state.settings, ...parsed.settings };
+              if (parsed.time) lastSyncDate = new Date(parsed.time);
+              applyBrandSettings();
+              renderHeroSlider();
+              renderCards();
+              if (cmsStatus && statusDot) {
+                cmsStatus.textContent = "CMS Aktif";
+                statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+              }
+            } catch {}
           }
         }
 
-        const res = await fetch(CMS_CONFIG.apiUrl + "?action=public&t=" + Date.now(), { cache: "no-store" });
-        if (res.ok) {
-          const json = await res.json();
-          if (json.ok && json.menus && json.menus.length) {
-            state.menus = json.menus;
-            if (json.settings) state.settings = { ...state.settings, ...json.settings };
-            lastSyncDate = new Date();
-            localStorage.setItem(CMS_CONFIG.cacheKey, JSON.stringify({ time: Date.now(), data: state.menus, settings: state.settings }));
+        // Resilient fetch strategy
+        let json = null;
+
+        // Strategy A: Fetch with timeout & redirect
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 16000);
+          const res = await fetch(CMS_CONFIG.apiUrl + "?action=public&t=" + Date.now(), {
+            cache: "no-store",
+            mode: "cors",
+            redirect: "follow",
+            signal: controller.signal
+          });
+          clearTimeout(timer);
+          if (res.ok) json = await res.json();
+        } catch (err) {}
+
+        // Strategy B: JSONP Fallback for mobile networks with CORS or proxy restrictions
+        if (!json || !json.ok) {
+          try {
+            json = await new Promise((resolve, reject) => {
+              const cbName = "_gas_cb_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+              const script = document.createElement("script");
+              let timer = null;
+
+              window[cbName] = (data) => {
+                cleanup();
+                if (data && data.ok) resolve(data);
+                else reject(new Error(data ? data.message : "Error"));
+              };
+
+              const cleanup = () => {
+                if (timer) clearTimeout(timer);
+                delete window[cbName];
+                if (script.parentNode) script.parentNode.removeChild(script);
+              };
+
+              timer = setTimeout(() => {
+                cleanup();
+                reject(new Error("Timeout koneksi seluler"));
+              }, 18000);
+
+              script.onerror = () => {
+                cleanup();
+                reject(new Error("Gagal load skrip"));
+              };
+
+              script.src = CMS_CONFIG.apiUrl + "?action=public&callback=" + cbName + "&t=" + Date.now();
+              document.head.appendChild(script);
+            });
+          } catch (err) {}
+        }
+
+        if (json && json.ok && json.menus && json.menus.length) {
+          failSyncCount = 0;
+          state.menus = json.menus;
+          if (json.settings) {
+            const safeBanners = json.settings.banners && Array.isArray(json.settings.banners) && json.settings.banners.length > 0
+              ? json.settings.banners
+              : (state.settings.banners && state.settings.banners.length ? state.settings.banners : DEFAULT_SLIDES);
+            state.settings = { ...state.settings, ...json.settings, banners: safeBanners };
+          }
+          lastSyncDate = new Date();
+          localStorage.setItem(CMS_CONFIG.cacheKey, JSON.stringify({ time: Date.now(), data: state.menus, settings: state.settings }));
+          if (cmsStatus && statusDot) {
             cmsStatus.textContent = "CMS Aktif";
             statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-            updateLiveClock();
           }
+          updateLiveClock();
+        } else {
+          throw new Error("Respon tidak valid");
         }
       } catch (e) {
-        cmsStatus.textContent = "Mode Cadangan";
-        statusDot.className = "w-2 h-2 rounded-full bg-slate-400";
+        failSyncCount++;
+        const hasCached = !!localStorage.getItem(CMS_CONFIG.cacheKey);
+        if (hasCached && failSyncCount < 4) {
+          if (cmsStatus && statusDot) {
+            cmsStatus.textContent = "CMS Aktif";
+            statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+          }
+        } else if (cmsStatus && statusDot) {
+          cmsStatus.textContent = "Mode Cadangan";
+          statusDot.className = "w-2 h-2 rounded-full bg-slate-400";
+        }
+      } finally {
+        isFetchingCMS = false;
       }
 
       applyBrandSettings();
@@ -771,8 +918,14 @@
     const refreshBtn = document.getElementById("refreshCmsBtn");
     if (refreshBtn) refreshBtn.onclick = () => loadCMS(false);
 
-    // Auto-polling every 8 seconds across all devices
-    setInterval(() => loadCMS(true), 8000);
+    // Auto-polling every 25 seconds across all devices (WiFi & Mobile Data)
+    setInterval(() => {
+      if (!document.hidden) loadCMS(true);
+    }, 25000);
+
+    // Sync on page focus or when network status changes to online
+    window.addEventListener("focus", () => loadCMS(true));
+    window.addEventListener("online", () => loadCMS(true));
 
     // Detail Modal
     document.getElementById("openDetailBtn").onclick = () => document.getElementById("detailModal").classList.remove("hidden");
@@ -801,15 +954,55 @@
       document.getElementById("adminModal").classList.add("hidden");
     };
 
-    document.getElementById("loginBtn").onclick = () => {
-      const pin = document.getElementById("pinInput").value;
-      const stored = localStorage.getItem("report_md_admin_pin") || "123456";
-      if (pin === stored || pin === "123456") {
+    document.getElementById("loginBtn").onclick = async () => {
+      const pin = document.getElementById("pinInput").value.trim();
+      const err = document.getElementById("pinError");
+      err.classList.add("hidden");
+
+      if (!pin) {
+        err.textContent = "Masukkan PIN admin.";
+        err.classList.remove("hidden");
+        return;
+      }
+
+      const stored = localStorage.getItem("report_md_admin_pin");
+
+      // 1. Coba verifikasi remote ke Google Apps Script jika terhubung
+      let remoteChecked = false;
+      try {
+        const res = await fetch(CMS_CONFIG.apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "getState", pin: pin })
+        });
+        if (res.ok) {
+          const json = await res.json();
+          remoteChecked = true;
+          if (json.ok && json.data) {
+            localStorage.setItem("report_md_admin_pin", pin);
+            document.getElementById("adminLoginView").classList.add("hidden");
+            document.getElementById("adminPanelView").classList.remove("hidden");
+            if (json.data.menus) state.menus = json.data.menus;
+            if (json.data.settings) state.settings = json.data.settings;
+            populateAdminPanel();
+            return;
+          } else {
+            err.textContent = json.message || "PIN admin salah. Silakan periksa kembali.";
+            err.classList.remove("hidden");
+            return;
+          }
+        }
+      } catch (e) {
+        // Offline / jaringan seluler lambat
+      }
+
+      // 2. Jika offline / server tidak dapat dihubungi:
+      const validLocalPin = stored || "123456";
+      if (!remoteChecked && pin === validLocalPin) {
         document.getElementById("adminLoginView").classList.add("hidden");
         document.getElementById("adminPanelView").classList.remove("hidden");
         populateAdminPanel();
       } else {
-        const err = document.getElementById("pinError");
         err.textContent = "PIN salah. Silakan periksa kembali.";
         err.classList.remove("hidden");
       }
@@ -854,19 +1047,24 @@
           <div class="flex items-center justify-between gap-2">
             <span class="w-5 h-5 rounded bg-blue-100 text-blue-800 text-xs font-bold flex items-center justify-center">${i+1}</span>
             <input type="text" value="${esc(s.title||'')}" onchange="state.settings.banners[${i}].title=this.value" placeholder="Judul Slide" class="flex-1 font-bold text-xs bg-white border border-slate-300 rounded px-2 py-1">
+            <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] font-extrabold">HD</span>
             <button type="button" onclick="removeSlide(${i})" class="text-rose-500 font-bold px-2 py-1 hover:bg-rose-50 rounded cursor-pointer">&times;</button>
           </div>
           <div class="flex items-center gap-2">
-            <input type="text" value="${esc(s.imageUrl)}" onchange="state.settings.banners[${i}].imageUrl=convertGoogleDriveUrl(this.value);renderAdminBanners();" placeholder="URL Foto atau Link Google Drive" class="flex-1 text-xs bg-white border border-slate-300 rounded px-2 py-1 truncate">
+            <input type="text" value="${esc(s.imageUrl)}" onchange="state.settings.banners[${i}].imageUrl=convertGoogleDriveUrl(this.value);renderAdminBanners();" placeholder="URL Foto atau Link Google Drive (Otomatis HD)" class="flex-1 text-xs bg-white border border-slate-300 rounded px-2 py-1 truncate">
             <label class="px-2.5 py-1 bg-[#1244a5] hover:bg-blue-800 text-white rounded text-xs font-bold cursor-pointer shrink-0">
-              Pilih File
+              Pilih File HD
               <input type="file" accept="image/*" class="hidden" onchange="uploadSlideImage(this, ${i})">
             </label>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+            <select onchange="state.settings.banners[${i}].fitMode=this.value" class="text-xs font-semibold bg-white border border-slate-300 rounded px-2 py-1">
+              <option value="contain" ${s.fitMode !== 'cover' ? 'selected' : ''}>Utuh Tanpa Terpotong (Landscape)</option>
+              <option value="cover" ${s.fitMode === 'cover' ? 'selected' : ''}>Penuhi Bingkai (Cover)</option>
+            </select>
             <label class="flex items-center gap-1.5 text-xs text-slate-700 cursor-pointer select-none">
               <input type="checkbox" ${s.hideOverlay ? 'checked' : ''} onchange="state.settings.banners[${i}].hideOverlay=this.checked" class="rounded">
-              <span>🖼️ Tampilkan Gambar Penuh (Sembunyikan pita biru)</span>
+              <span>🖼️ Sembunyikan pita biru</span>
             </label>
           </div>
           <div class="grid grid-cols-2 gap-2 text-xs">
@@ -878,7 +1076,7 @@
     }
 
     window.removeSlide = function(i) {
-      if ((state.settings.banners || []).length <= 1) return alert("Minimal 1 slide");
+      if ((state.settings.banners || []).length <= 1) return;
       state.settings.banners.splice(i, 1);
       renderAdminBanners();
     };
@@ -891,19 +1089,50 @@
       reader.onload = (e) => {
         img.src = e.target.result;
         img.onload = () => {
-          let w = img.width, h = img.height;
-          const maxW = 640, maxH = 260;
-          if (w > maxW || h > maxH) {
-            const ratio = Math.min(maxW / w, maxH / h);
-            w = Math.round(w * ratio);
-            h = Math.round(h * ratio);
+          const tiers = [{ maxW: 1600, maxH: 900 }, { maxW: 1366, maxH: 768 }, { maxW: 1152, maxH: 648 }];
+          const qualities = [0.92, 0.86, 0.80, 0.74];
+          let finalDataUrl = "";
+
+          for (const tier of tiers) {
+            let targetW = img.naturalWidth || img.width;
+            let targetH = img.naturalHeight || img.height;
+            if (targetW > tier.maxW || targetH > tier.maxH) {
+              const r = Math.min(tier.maxW / targetW, tier.maxH / targetH);
+              targetW = Math.max(1, Math.round(targetW * r));
+              targetH = Math.max(1, Math.round(targetH * r));
+            }
+            let curSrc = img, curW = img.naturalWidth || img.width, curH = img.naturalHeight || img.height;
+            while (curW * 0.5 > targetW && curH * 0.5 > targetH) {
+              const nw = Math.max(targetW, Math.round(curW * 0.5));
+              const nh = Math.max(targetH, Math.round(curH * 0.5));
+              const sc = document.createElement('canvas');
+              sc.width = nw; sc.height = nh;
+              const sctx = sc.getContext('2d');
+              if (!sctx) break;
+              sctx.imageSmoothingEnabled = true; sctx.imageSmoothingQuality = 'high';
+              sctx.drawImage(curSrc, 0, 0, nw, nh);
+              curSrc = sc; curW = nw; curH = nh;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW; canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) continue;
+            ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(curSrc, 0, 0, targetW, targetH);
+
+            let matched = false;
+            for (const q of qualities) {
+              const wp = canvas.toDataURL('image/webp', q);
+              const cand = wp.startsWith('data:image/webp') ? wp : canvas.toDataURL('image/jpeg', q);
+              finalDataUrl = cand;
+              if (cand.length <= 130000) { matched = true; break; }
+            }
+            if (matched) break;
           }
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, w, h);
-            state.settings.banners[idx].imageUrl = canvas.toDataURL('image/jpeg', 0.68);
+
+          if (finalDataUrl) {
+            state.settings.banners[idx].imageUrl = finalDataUrl;
+            state.settings.banners[idx].fitMode = state.settings.banners[idx].fitMode || 'contain';
             renderAdminBanners();
           }
         };
@@ -919,10 +1148,47 @@
         title: "Judul Slide Baru",
         subtitle: "",
         badgeText: "",
-        hideOverlay: false
+        hideOverlay: false,
+        fitMode: "contain"
       });
       renderAdminBanners();
     };
+
+    function uploadMenuPhoto(idx) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 8 * 1024 * 1024) {
+          alert('Ukuran foto maksimal 8MB.');
+          return;
+        }
+        const reader = new FileReader();
+        const img = new Image();
+        reader.onload = (ev) => {
+          img.src = ev.target.result;
+          img.onload = () => {
+            const size = Math.min(img.width, img.height);
+            const startX = (img.width - size) / 2;
+            const startY = (img.height - size) / 2;
+            const canvas = document.createElement('canvas');
+            canvas.width = 160;
+            canvas.height = 160;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, startX, startY, size, size, 0, 0, 160, 160);
+              const compressed = canvas.toDataURL('image/jpeg', 0.72);
+              state.menus[idx].fotoUrl = compressed;
+              renderAdminMenus();
+            }
+          };
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    }
 
     function renderAdminMenus() {
       const box = document.getElementById("menusList");
@@ -939,12 +1205,28 @@
           </div>
           <input type="text" value="${esc(m.link)}" onchange="state.menus[${i}].link=this.value" placeholder="URL Google Sheets" class="w-full text-xs bg-white border border-slate-300 rounded px-2 py-1">
           <input type="text" value="${esc(m.deskripsi||'')}" onchange="state.menus[${i}].deskripsi=this.value" placeholder="Deskripsi singkat" class="w-full text-xs bg-white border border-slate-300 rounded px-2 py-1">
+          
+          <div class="pt-1.5 border-t border-slate-200/80 flex items-center justify-between gap-2 bg-white/60 p-1.5 rounded-lg">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-slate-100 border border-blue-200 flex items-center justify-center overflow-hidden shrink-0">
+                ${m.fotoUrl ? `<img src="${esc(m.fotoUrl)}" class="w-full h-full object-cover">` : `<span class="text-[10px] text-slate-400 font-bold">MD</span>`}
+              </div>
+              <span class="text-[11px] font-semibold text-slate-600">${m.fotoUrl ? 'Foto kustom terpasang' : 'Icon bawaan'}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="uploadMenuPhoto(${i})" class="text-[11px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded border border-blue-200">
+                ${m.fotoUrl ? 'Ganti Foto' : 'Unggah Foto MD'}
+              </button>
+              ${m.fotoUrl ? `<button type="button" onclick="state.menus[${i}].fotoUrl='';renderAdminMenus();" class="text-[11px] text-rose-600 hover:bg-rose-50 px-1.5 py-1 rounded">Hapus</button>` : ''}
+            </div>
+          </div>
+          <input type="text" value="${esc(m.fotoUrl||'')}" onchange="state.menus[${i}].fotoUrl=convertGoogleDriveUrl(this.value);renderAdminMenus();" placeholder="Atau Link Foto (Google Drive / URL)" class="w-full text-[11px] bg-white border border-slate-200 rounded px-2 py-1">
         </div>
       `).join("");
     }
 
     document.getElementById("addMenuBtn").onclick = () => {
-      state.menus.push({ nama: "Menu Baru", link: "#", status: "AKTIF", urutan: state.menus.length+1, deskripsi: "" });
+      state.menus.push({ nama: "Menu Baru", link: "#", status: "AKTIF", urutan: state.menus.length+1, deskripsi: "", fotoUrl: "" });
       renderAdminMenus();
     };
 
@@ -1058,7 +1340,7 @@
       const msg = document.getElementById("pinMsg");
       const stored = localStorage.getItem("report_md_admin_pin") || "123456";
 
-      if (oldPin && oldPin !== stored && oldPin !== "123456") {
+      if (oldPin && oldPin !== stored) {
         msg.textContent = "PIN lama yang Anda masukkan salah.";
         msg.className = "text-xs font-semibold text-rose-600 block p-2 bg-rose-50 rounded-lg mt-2";
         msg.classList.remove("hidden");
@@ -1072,13 +1354,13 @@
       }
 
       localStorage.setItem("report_md_admin_pin", newPin);
-      msg.textContent = "PIN berhasil diubah dan aktif!";
+      msg.textContent = "PIN berhasil diubah dan aktif! PIN bawaan tidak dapat digunakan lagi.";
       msg.className = "text-xs font-semibold text-emerald-600 block p-2 bg-emerald-50 rounded-lg mt-2";
       msg.classList.remove("hidden");
       document.getElementById("oldPinInput").value = "";
       document.getElementById("newPinInput").value = "";
 
-      // Try background update to Apps Script
+      // Kirim pembaruan ke Google Apps Script
       try {
         await fetch(CMS_CONFIG.apiUrl, {
           method: "POST",
